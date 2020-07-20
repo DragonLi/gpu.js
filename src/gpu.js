@@ -277,6 +277,14 @@ class GPU {
       if (_kernel.signature && !switchableKernels[_kernel.signature]) {
         switchableKernels[_kernel.signature] = _kernel;
       }
+      for (let i = reasons.length - 1; i >= 0; i--) {
+        const reason = reasons[i];
+        if (reason === 'preUploadValue length too small') {
+          _kernel.rebuildArguments(args)
+          _kernel.onActivate(_kernel);
+          return _kernel;
+        }
+      }
       if (_kernel.dynamicOutput) {
         for (let i = reasons.length - 1; i >= 0; i--) {
           const reason = reasons[i];

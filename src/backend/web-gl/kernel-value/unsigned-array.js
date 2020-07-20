@@ -35,6 +35,16 @@ class WebGLKernelValueUnsignedArray extends WebGLKernelArray {
       this.onUpdateValueMismatch(value.constructor);
       return;
     }
+    if (this.preUploadValue.length < value.length) {
+      console.log('preUploadValue length too small')
+      this.onUpdateValueMismatch('preUploadValue length too small');
+      return;
+    }
+    let newDim = utils.getDimensions(value, true);
+    if (this.dimensions[0] !== newDim[0]) {
+      console.log('different dimensions, clear old values')
+      this.preUploadValue.fill(0)
+    }
     const { context: gl } = this;
     utils.flattenTo(value, this.preUploadValue);
     gl.activeTexture(this.contextHandle);

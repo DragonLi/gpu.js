@@ -131,7 +131,7 @@ class WebGL2Kernel extends WebGLKernel {
    */
   initContext() {
     const settings = {
-      alpha: false,
+      alpha: true,
       depth: false,
       antialias: false
     };

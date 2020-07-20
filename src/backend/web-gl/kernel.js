@@ -190,7 +190,7 @@ class WebGLKernel extends GLKernel {
    */
   initContext() {
     const settings = {
-      alpha: false,
+      alpha: true,
       depth: false,
       antialias: false
     };
@@ -337,6 +337,15 @@ class WebGLKernel extends GLKernel {
     if (this.maxTexSize[1] < texSize[1]) {
       this.maxTexSize[1] = texSize[1];
     }
+  }
+
+  rebuildArguments(args) {
+    if (this.kernelArguments) {
+      for (let i = 0; i < this.kernelArguments.length; i++) {
+        this.kernelArguments[i].destroy();
+      }
+    }
+    setupArguments(args)
   }
 
   setupArguments(args) {
