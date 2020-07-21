@@ -277,12 +277,15 @@ class GPU {
       if (_kernel.signature && !switchableKernels[_kernel.signature]) {
         switchableKernels[_kernel.signature] = _kernel;
       }
+
+      const Constructor = _kernel.constructor;
+      const argumentTypes = Constructor.getArgumentTypes(_kernel, args);
+      const signature = Constructor.getSignature(_kernel, argumentTypes);
       for (let i = reasons.length - 1; i >= 0; i--) {
         const reason = reasons[i];
-        if (reason === 'preUploadValue length too small') {
-          _kernel.rebuildArguments(args)
-          _kernel.onActivate(_kernel);
-          return _kernel;
+        if (reason.needed === 'preUploadValue length too small') {
+          const newKernel = recreateKernel();
+          return newKernel;
         }
       }
       if (_kernel.dynamicOutput) {
@@ -294,53 +297,55 @@ class GPU {
         }
       }
 
-      const Constructor = _kernel.constructor;
-      const argumentTypes = Constructor.getArgumentTypes(_kernel, args);
-      const signature = Constructor.getSignature(_kernel, argumentTypes);
       const existingKernel = switchableKernels[signature];
       if (existingKernel) {
         existingKernel.onActivate(_kernel);
         return existingKernel;
       }
 
-      const newKernel = switchableKernels[signature] = new Constructor(source, {
-        argumentTypes,
-        constantTypes: _kernel.constantTypes,
-        graphical: _kernel.graphical,
-        loopMaxIterations: _kernel.loopMaxIterations,
-        constants: _kernel.constants,
-        dynamicOutput: _kernel.dynamicOutput,
-        dynamicArgument: _kernel.dynamicArguments,
-        context: _kernel.context,
-        canvas: _kernel.canvas,
-        output: newOutput || _kernel.output,
-        precision: _kernel.precision,
-        pipeline: _kernel.pipeline,
-        immutable: _kernel.immutable,
-        optimizeFloatMemory: _kernel.optimizeFloatMemory,
-        fixIntegerDivisionAccuracy: _kernel.fixIntegerDivisionAccuracy,
-        functions: _kernel.functions,
-        nativeFunctions: _kernel.nativeFunctions,
-        injectedNative: _kernel.injectedNative,
-        subKernels: _kernel.subKernels,
-        strictIntegers: _kernel.strictIntegers,
-        debug: _kernel.debug,
-        gpu: _kernel.gpu,
-        validate,
-        returnType: _kernel.returnType,
-        onIstanbulCoverageVariable: _kernel.onIstanbulCoverageVariable,
-        removeIstanbulCoverage: _kernel.removeIstanbulCoverage,
-        tactic: _kernel.tactic,
-        onRequestFallback,
-        onRequestSwitchKernel,
-        texture: _kernel.texture,
-        mappedTextures: _kernel.mappedTextures,
-        drawBuffersMap: _kernel.drawBuffersMap,
-      });
-      newKernel.build.apply(newKernel, args);
-      kernelRun.replaceKernel(newKernel);
-      kernels.push(newKernel);
+      const newKernel = recreateKernel();
       return newKernel;
+
+      function recreateKernel() {
+        const newKernel = switchableKernels[signature] = new Constructor(source, {
+          argumentTypes,
+          constantTypes: _kernel.constantTypes,
+          graphical: _kernel.graphical,
+          loopMaxIterations: _kernel.loopMaxIterations,
+          constants: _kernel.constants,
+          dynamicOutput: _kernel.dynamicOutput,
+          dynamicArgument: _kernel.dynamicArguments,
+          context: _kernel.context,
+          canvas: _kernel.canvas,
+          output: newOutput || _kernel.output,
+          precision: _kernel.precision,
+          pipeline: _kernel.pipeline,
+          immutable: _kernel.immutable,
+          optimizeFloatMemory: _kernel.optimizeFloatMemory,
+          fixIntegerDivisionAccuracy: _kernel.fixIntegerDivisionAccuracy,
+          functions: _kernel.functions,
+          nativeFunctions: _kernel.nativeFunctions,
+          injectedNative: _kernel.injectedNative,
+          subKernels: _kernel.subKernels,
+          strictIntegers: _kernel.strictIntegers,
+          debug: _kernel.debug,
+          gpu: _kernel.gpu,
+          validate,
+          returnType: _kernel.returnType,
+          onIstanbulCoverageVariable: _kernel.onIstanbulCoverageVariable,
+          removeIstanbulCoverage: _kernel.removeIstanbulCoverage,
+          tactic: _kernel.tactic,
+          onRequestFallback,
+          onRequestSwitchKernel,
+          texture: _kernel.texture,
+          mappedTextures: _kernel.mappedTextures,
+          drawBuffersMap: _kernel.drawBuffersMap,
+        });
+        newKernel.build.apply(newKernel, args);
+        kernelRun.replaceKernel(newKernel);
+        kernels.push(newKernel);
+        return newKernel;
+      }
     }
     const mergedSettings = Object.assign({
       context: this.context,
