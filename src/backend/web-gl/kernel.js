@@ -339,15 +339,6 @@ class WebGLKernel extends GLKernel {
     }
   }
 
-  rebuildArguments(args) {
-    if (this.kernelArguments) {
-      for (let i = 0; i < this.kernelArguments.length; i++) {
-        this.kernelArguments[i].destroy();
-      }
-    }
-    setupArguments(args)
-  }
-
   setupArguments(args) {
     this.kernelArguments = [];
     this.argumentTextureCount = 0;
