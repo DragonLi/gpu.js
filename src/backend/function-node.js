@@ -872,7 +872,7 @@ class FunctionNode {
    * @param {Array} retArr - return array string
    * @returns {Array} the parsed string array
    */
-  astGeneric(ast, retArr) {
+  astGeneric(ast, retArr, isForInit) {
     if (ast === null) {
       throw this.astErrorOutput('NULL ast', ast);
     } else {
@@ -919,7 +919,7 @@ class FunctionNode {
         case 'DoWhileStatement':
           return this.astDoWhileStatement(ast, retArr);
         case 'VariableDeclaration':
-          return this.astVariableDeclaration(ast, retArr);
+          return this.astVariableDeclaration(ast, retArr, isForInit);
         case 'VariableDeclarator':
           return this.astVariableDeclarator(ast, retArr);
         case 'ThisExpression':

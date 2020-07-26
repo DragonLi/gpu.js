@@ -641,7 +641,7 @@ class WebGLFunctionNode extends FunctionNode {
       if (declarations.length > 1) {
         isSafe = false;
       }
-      this.astGeneric(forNode.init, initArr);
+      this.astGeneric(forNode.init, initArr, true);
       for (let i = 0; i < declarations.length; i++) {
         if (declarations[i].init && declarations[i].init.type !== 'Literal') {
           isSafe = false;
@@ -653,6 +653,10 @@ class WebGLFunctionNode extends FunctionNode {
 
     if (forNode.test) {
       this.astGeneric(forNode.test, testArr);
+      if (forNode.test.type === 'BinaryExpression') {
+        testArr.splice(testArr.length - 1, 1)
+        testArr.splice(0, 1)
+      }
     } else {
       isSafe = false;
     }
@@ -810,7 +814,7 @@ class WebGLFunctionNode extends FunctionNode {
    * @param {Array} retArr - return array string
    * @returns {Array} the append retArr
    */
-  astVariableDeclaration(varDecNode, retArr) {
+  astVariableDeclaration(varDecNode, retArr, isForInit) {
     const declarations = varDecNode.declarations;
     if (!declarations || !declarations[0] || !declarations[0].init) {
       throw this.astErrorOutput('Unexpected expression', varDecNode);
@@ -827,6 +831,8 @@ class WebGLFunctionNode extends FunctionNode {
       let type = actualType;
       if (type === 'LiteralInteger') {
         if (info.suggestedType === 'Integer') {
+          type = 'Integer';
+        } else if (isForInit && init.type === 'Literal' && Number.isInteger(init.value)) {
           type = 'Integer';
         } else {
           // We had the choice to go either float or int, choosing float
