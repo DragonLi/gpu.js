@@ -926,7 +926,7 @@ class Kernel {
     }
 
     return {
-      name: utils.getFunctionNameFromString(sourceString) || null,
+      name: settings.name || utils.getFunctionNameFromString(sourceString) || null,
       source: sourceString,
       argumentTypes,
       returnType: settings.returnType || null,
