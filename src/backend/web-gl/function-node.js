@@ -844,7 +844,7 @@ class WebGLFunctionNode extends FunctionNode {
         throw this.astErrorOutput(`Markup type ${ markupType } not handled`, varDecNode);
       }
       const declarationResult = [];
-      if (actualType === 'Integer' && type === 'Integer') {
+      if (actualType === 'Integer' && type === 'Integer' && init.type !== 'CallExpression') {
         // Since we are assigning to a float, ensure valueType is reset to that
         info.valueType = 'Number';
         if (i === 0 || lastType === null) {
