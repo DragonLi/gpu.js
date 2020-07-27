@@ -519,6 +519,9 @@ class WebGLKernel extends GLKernel {
       throw new Error('Error compiling vertex shader: ' + gl.getShaderInfoLog(vertShader));
     }
     if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
+      console.log('WebGL kernel program error')
+      console.log(compiledVertexShader)
+      console.log(compiledFragmentShader);
       throw new Error('Error compiling fragment shader: ' + gl.getShaderInfoLog(fragShader));
     }
 
