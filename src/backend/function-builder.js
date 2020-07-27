@@ -160,6 +160,7 @@ class FunctionBuilder {
       functionNodes = functions.map((fn) => new FunctionNode(fn.source, {
         returnType: fn.returnType,
         argumentTypes: fn.argumentTypes,
+        name: fn.name,
         output,
         plugins,
         constants,
