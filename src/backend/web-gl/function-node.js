@@ -653,10 +653,6 @@ class WebGLFunctionNode extends FunctionNode {
 
     if (forNode.test) {
       this.astGeneric(forNode.test, testArr);
-      if (forNode.test.type === 'BinaryExpression') {
-        testArr.splice(testArr.length - 1, 1)
-        testArr.splice(0, 1)
-      }
     } else {
       isSafe = false;
     }
@@ -679,6 +675,10 @@ class WebGLFunctionNode extends FunctionNode {
     }
 
     if (isSafe) {
+      if (forNode.test.type === 'BinaryExpression') {
+        testArr.splice(testArr.length - 1, 1)
+        testArr.splice(0, 1)
+      }
       const initString = initArr.join('');
       const initNeedsSemiColon = initString[initString.length - 1] !== ';';
       retArr.push(`for (${initString}${initNeedsSemiColon ? ';' : ''}${testArr.join('')};${updateArr.join('')}){\n`);
