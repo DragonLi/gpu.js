@@ -2,7 +2,7 @@ const { WebGLKernel } = require('../web-gl/kernel');
 const { WebGL2FunctionNode } = require('./function-node');
 const { FunctionBuilder } = require('../function-builder');
 const { utils } = require('../../utils');
-const { fragmentShader } = require('./fragment-shader');
+const { fragmentShader, fragmentShaderBackup } = require('./fragment-shader');
 const { vertexShader } = require('./vertex-shader');
 const { lookupKernelValueType } = require('./kernel-value-maps');
 
@@ -121,6 +121,11 @@ class WebGL2Kernel extends WebGLKernel {
   static get fragmentShader() {
     return fragmentShader;
   }
+
+  static get fragmentShaderBackup() {
+    return fragmentShaderBackup;
+  }
+
   static get vertexShader() {
     return vertexShader;
   }

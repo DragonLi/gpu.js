@@ -1,4 +1,92 @@
 // language=GLSL
+const fragmentShaderBackup = `__HEADER__;
+__FLOAT_TACTIC_DECLARATION__;
+__INT_TACTIC_DECLARATION__;
+__SAMPLER_2D_TACTIC_DECLARATION__;
+
+const int LOOP_MAX = __LOOP_MAX__;
+
+__PLUGINS__;
+__CONSTANTS__;
+
+varying vec2 vTexCoord;
+
+float _pow(float v1, float v2) {
+  if (v2 == 0.0) return 1.0;
+  return pow(v1, v2);
+}
+
+float integerMod(float x, float y) {
+  float res = floor(mod(x, y));
+  return res * (res > floor(y) - 1.0 ? 0.0 : 1.0);
+}
+
+int integerMod(int x, int y) {
+  return x - (y * int(x / y));
+}
+
+__DIVIDE_WITH_INTEGER_CHECK__;
+
+float decode16(vec4 texel, int index) {
+  int channel = integerMod(index, 2);
+  if (channel == 0) return texel.r * 255.0 + texel.g * 65280.0;
+  if (channel == 1) return texel.b * 255.0 + texel.a * 65280.0;
+  return 0.0;
+}
+
+float decode8(vec4 texel, int index) {
+  int channel = integerMod(index, 4);
+  if (channel == 0) return texel.r * 255.0;
+  if (channel == 1) return texel.g * 255.0;
+  if (channel == 2) return texel.b * 255.0;
+  if (channel == 3) return texel.a * 255.0;
+  return 0.0;
+}
+
+
+int index;
+ivec3 threadId;
+
+ivec3 indexTo3D(int idx, ivec3 texDim) {
+  int z = int(idx / (texDim.x * texDim.y));
+  idx -= z * int(texDim.x * texDim.y);
+  int y = int(idx / texDim.x);
+  int x = int(integerMod(idx, texDim.x));
+  return ivec3(x, y, z);
+}
+
+float get16(sampler2D tex, ivec2 texSize, ivec3 texDim, int z, int y, int x) {
+  int index = x + texDim.x * (y + texDim.y * z);
+  int w = texSize.x * 2;
+  vec2 st = vec2(float(integerMod(index, w)), float(index / w)) + 0.5;
+  vec4 texel = texture2D(tex, st / vec2(texSize.x * 2, texSize.y));
+  return decode16(texel, index);
+}
+
+float get8(sampler2D tex, ivec2 texSize, ivec3 texDim, int z, int y, int x) {
+  int index = x + texDim.x * (y + texDim.y * z);
+  int w = texSize.x * 4;
+  vec2 st = vec2(float(integerMod(index, w)), float(index / w)) + 0.5;
+  vec4 texel = texture2D(tex, st / vec2(texSize.x * 4, texSize.y));
+  return decode8(texel, index);
+}
+
+vec4 actualColor;
+void color(float r, float g, float b, float a) {
+  actualColor = vec4(r,g,b,a);
+}
+
+
+__INJECTED_NATIVE__;
+__MAIN_CONSTANTS__;
+__MAIN_ARGUMENTS__;
+__KERNEL__;
+
+void main(void) {
+  index = int(vTexCoord.s * float(uTexSize.x)) + int(vTexCoord.t * float(uTexSize.y)) * uTexSize.x;
+  __MAIN_RESULT__;
+}`;
+
 const fragmentShader = `__HEADER__;
 __FLOAT_TACTIC_DECLARATION__;
 __INT_TACTIC_DECLARATION__;
@@ -490,7 +578,7 @@ void main(void) {
   index = int(vTexCoord.s * float(uTexSize.x)) + int(vTexCoord.t * float(uTexSize.y)) * uTexSize.x;
   __MAIN_RESULT__;
 }`;
-
 module.exports = {
-  fragmentShader
+  fragmentShader,
+  fragmentShaderBackup
 };

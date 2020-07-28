@@ -3,7 +3,7 @@ const { FunctionBuilder } = require('../function-builder');
 const { WebGLFunctionNode } = require('./function-node');
 const { utils } = require('../../utils');
 const mrud = require('../../plugins/math-random-uniformly-distributed');
-const { fragmentShader } = require('./fragment-shader');
+const { fragmentShader, fragmentShaderBackup } = require('./fragment-shader');
 const { vertexShader } = require('./vertex-shader');
 const { glKernelString } = require('../gl/kernel-string');
 const { lookupKernelValueType } = require('./kernel-value-maps');
@@ -116,6 +116,10 @@ class WebGLKernel extends GLKernel {
 
   static get fragmentShader() {
     return fragmentShader;
+  }
+
+  static get fragmentShaderBackup() {
+    return fragmentShaderBackup;
   }
 
   static get vertexShader() {
@@ -504,7 +508,8 @@ class WebGLKernel extends GLKernel {
     gl.compileShader(vertShader);
     this.vertShader = vertShader;
 
-    const compiledFragmentShader = this.getFragmentShader(arguments);
+    const isPatch = this.argumentNames.length > 0 && this.argumentNames[0] === 'scoreList';
+    const compiledFragmentShader = this.getFragmentShader(arguments, isPatch);
     const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragShader, compiledFragmentShader);
     gl.compileShader(fragShader);
@@ -1457,9 +1462,12 @@ float integerCorrectionModulo(float number, float divisor) {
    * @param {Array} args - The actual parameters sent to the Kernel
    * @returns {string} Fragment Shader string
    */
-  getFragmentShader(args) {
+  getFragmentShader(args, isPatch) {
     if (this.compiledFragmentShader !== null) {
       return this.compiledFragmentShader;
+    }
+    if (isPatch) {
+      return this.compiledFragmentShader = this.replaceArtifacts(this.constructor.fragmentShaderBackup, this._getFragShaderArtifactMap(args));
     }
     return this.compiledFragmentShader = this.replaceArtifacts(this.constructor.fragmentShader, this._getFragShaderArtifactMap(args));
   }
