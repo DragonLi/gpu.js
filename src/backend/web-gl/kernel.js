@@ -506,36 +506,36 @@ class WebGLKernel extends GLKernel {
     const vertShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertShader, compiledVertexShader);
     gl.compileShader(vertShader);
+    if (!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
+      gl.deleteShader(vertShader)
+      throw new Error('Error compiling vertex shader: ' + gl.getShaderInfoLog(vertShader));
+    }
     this.vertShader = vertShader;
 
     const isPatch = this.argumentNames.length > 0 && this.argumentNames[0] === 'scoreList';
     const compiledFragmentShader = this.getFragmentShader(arguments, isPatch);
-    const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(fragShader, compiledFragmentShader);
-    gl.compileShader(fragShader);
-    this.fragShader = fragShader;
-
     if (this.debug) {
       console.log('GLSL Shader Output:');
       console.log(compiledFragmentShader);
     }
-
-    if (!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
-      throw new Error('Error compiling vertex shader: ' + gl.getShaderInfoLog(vertShader));
-    }
+    const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fragShader, compiledFragmentShader);
+    gl.compileShader(fragShader);
     if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
       console.log('WebGL kernel program error')
       console.log(compiledVertexShader)
       console.log(compiledFragmentShader);
+      gl.deleteShader(fragShader)
       throw new Error('Error compiling fragment shader: ' + gl.getShaderInfoLog(fragShader));
     }
+    this.fragShader = fragShader;
 
     const program = this.program = gl.createProgram();
     gl.attachShader(program, vertShader);
     gl.attachShader(program, fragShader);
     gl.linkProgram(program);
-
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      gl.deleteProgram(program)
       throw new Error('shader program link error: ' + gl.getProgramInfoLog(program));
     }
 
