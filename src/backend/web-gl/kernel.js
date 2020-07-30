@@ -534,6 +534,11 @@ class WebGLKernel extends GLKernel {
     gl.attachShader(program, vertShader);
     gl.attachShader(program, fragShader);
     gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      throw new Error('shader program link error: ' + gl.getProgramInfoLog(program));
+    }
+
     this.framebuffer = gl.createFramebuffer();
     this.framebuffer.width = texSize[0];
     this.framebuffer.height = texSize[1];
