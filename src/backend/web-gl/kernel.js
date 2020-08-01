@@ -507,8 +507,9 @@ class WebGLKernel extends GLKernel {
     gl.shaderSource(vertShader, compiledVertexShader);
     gl.compileShader(vertShader);
     if (!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
+      let errorLog = gl.getShaderInfoLog(vertShader);
       gl.deleteShader(vertShader)
-      throw new Error('Error compiling vertex shader: ' + gl.getShaderInfoLog(vertShader));
+      throw new Error('Error compiling vertex shader: ' + errorLog);
     }
     this.vertShader = vertShader;
 
@@ -525,8 +526,9 @@ class WebGLKernel extends GLKernel {
       console.log('WebGL kernel program error')
       console.log(compiledVertexShader)
       console.log(compiledFragmentShader);
+      let errorLog = gl.getShaderInfoLog(fragShader);
       gl.deleteShader(fragShader)
-      throw new Error('Error compiling fragment shader: ' + gl.getShaderInfoLog(fragShader));
+      throw new Error('Error compiling fragment shader: ' + errorLog);
     }
     this.fragShader = fragShader;
 
@@ -535,8 +537,9 @@ class WebGLKernel extends GLKernel {
     gl.attachShader(program, fragShader);
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      let errorLog = gl.getProgramInfoLog(program);
       gl.deleteProgram(program)
-      throw new Error('shader program link error: ' + gl.getProgramInfoLog(program));
+      throw new Error('shader program link error: ' + errorLog);
     }
 
     this.framebuffer = gl.createFramebuffer();
