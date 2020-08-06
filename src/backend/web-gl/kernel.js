@@ -506,11 +506,6 @@ class WebGLKernel extends GLKernel {
     const vertShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertShader, compiledVertexShader);
     gl.compileShader(vertShader);
-    if (!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
-      let errorLog = gl.getShaderInfoLog(vertShader);
-      gl.deleteShader(vertShader)
-      throw new Error('Error compiling vertex shader: ' + errorLog);
-    }
     this.vertShader = vertShader;
 
     const isPatch = this.argumentNames.length > 0 && this.argumentNames[0] === 'scoreList';
@@ -522,14 +517,6 @@ class WebGLKernel extends GLKernel {
     const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragShader, compiledFragmentShader);
     gl.compileShader(fragShader);
-    if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
-      console.log('WebGL kernel program error')
-      console.log(compiledVertexShader)
-      console.log(compiledFragmentShader);
-      let errorLog = gl.getShaderInfoLog(fragShader);
-      gl.deleteShader(fragShader)
-      throw new Error('Error compiling fragment shader: ' + errorLog);
-    }
     this.fragShader = fragShader;
 
     const program = this.program = gl.createProgram();
@@ -537,7 +524,15 @@ class WebGLKernel extends GLKernel {
     gl.attachShader(program, fragShader);
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      let vLog = gl.getShaderInfoLog(vertShader);
+      console.log(compiledVertexShader)
+      console.log('vertex shader log: ' + vLog)
+      let fLog = gl.getShaderInfoLog(fragShader);
+      console.log(compiledFragmentShader);
+      console.log('fragment shader log: ' + fLog)
       let errorLog = gl.getProgramInfoLog(program);
+      gl.deleteShader(vertShader)
+      gl.deleteShader(fragShader)
       gl.deleteProgram(program)
       throw new Error('shader program link error: ' + errorLog);
     }
