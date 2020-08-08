@@ -511,7 +511,9 @@ class WebGLKernel extends GLKernel {
     const isPatch = this.argumentNames.length > 0 && this.argumentNames[0] === 'scoreList';
     const compiledFragmentShader = this.getFragmentShader(arguments, isPatch);
     if (this.debug) {
-      console.log('GLSL Shader Output:');
+      console.log('GLSL vShader Output:');
+      console.log(compiledVertexShader);
+      console.log('GLSL fShader Output:');
       console.log(compiledFragmentShader);
     }
     const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
