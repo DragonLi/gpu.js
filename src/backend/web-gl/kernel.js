@@ -958,7 +958,7 @@ class WebGLKernel extends GLKernel {
    * @param {Array} args - The actual parameters sent to the Kernel
    * @returns {Object} An object containing the Shader Artifacts(CONSTANTS, HEADER, KERNEL, etc.)
    */
-  _getFragShaderArtifactMap(args) {
+  _getFragShaderArtifactMap(args, isPatch) {
     return {
       HEADER: this._getHeaderString(),
       LOOP_MAX: this._getLoopMaxString(),
@@ -966,7 +966,7 @@ class WebGLKernel extends GLKernel {
       CONSTANTS: this._getConstantsString(),
       DECODE32_ENDIANNESS: this._getDecode32EndiannessString(),
       ENCODE32_ENDIANNESS: this._getEncode32EndiannessString(),
-      DIVIDE_WITH_INTEGER_CHECK: this._getDivideWithIntegerCheckString(),
+      DIVIDE_WITH_INTEGER_CHECK: this._getDivideWithIntegerCheckString(isPatch),
       INJECTED_NATIVE: this._getInjectedNative(),
       MAIN_CONSTANTS: this._getMainConstantsString(),
       MAIN_ARGUMENTS: this._getMainArgumentsString(args),
@@ -1088,8 +1088,15 @@ class WebGLKernel extends GLKernel {
    * @desc if fixIntegerDivisionAccuracy provide method to replace /
    * @returns {String} result
    */
-  _getDivideWithIntegerCheckString() {
-    return this.fixIntegerDivisionAccuracy ?
+  _getDivideWithIntegerCheckString(isPatch) {
+    const fixFunc = isPatch ?
+      `float divWithIntCheck(float x, float y) {
+  if (floor(x) == x && floor(y) == y && integerMod(x, y) == 0.0) {
+    return float(int(x) / int(y));
+  }
+  return x / y;
+}
+` :
       `float divWithIntCheck(float x, float y) {
   if (floor(x) == x && floor(y) == y && integerMod(x, y) == 0.0) {
     return float(int(x) / int(y));
@@ -1109,7 +1116,10 @@ float integerCorrectionModulo(float number, float divisor) {
     divisor = abs(divisor);
   }
   return number - (divisor * floor(divWithIntCheck(number, divisor)));
-}` :
+}
+`
+    return this.fixIntegerDivisionAccuracy ?
+      fixFunc :
       '';
   }
 
@@ -1472,7 +1482,7 @@ float integerCorrectionModulo(float number, float divisor) {
       return this.compiledFragmentShader;
     }
     if (isPatch) {
-      return this.compiledFragmentShader = this.replaceArtifacts(this.constructor.fragmentShaderBackup, this._getFragShaderArtifactMap(args));
+      return this.compiledFragmentShader = this.replaceArtifacts(this.constructor.fragmentShaderBackup, this._getFragShaderArtifactMap(args, isPatch));
     }
     return this.compiledFragmentShader = this.replaceArtifacts(this.constructor.fragmentShader, this._getFragShaderArtifactMap(args));
   }
