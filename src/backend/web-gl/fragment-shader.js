@@ -16,59 +16,28 @@ float _pow(float v1, float v2) {
   return pow(v1, v2);
 }
 
-float integerMod(float x, float y) {
-  float res = floor(mod(x, y));
-  return res * (res > floor(y) - 1.0 ? 0.0 : 1.0);
-}
-
-int integerMod(int x, int y) {
+int integerModInt(int x, int y) {
   return x - (y * int(x / y));
 }
 
-__DIVIDE_WITH_INTEGER_CHECK__;
-
 float decode16(vec4 texel, int index) {
-  int channel = integerMod(index, 2);
+  int channel = integerModInt(index, 2);
   if (channel == 0) return texel.r * 255.0 + texel.g * 65280.0;
   if (channel == 1) return texel.b * 255.0 + texel.a * 65280.0;
   return 0.0;
 }
 
-float decode8(vec4 texel, int index) {
-  int channel = integerMod(index, 4);
-  if (channel == 0) return texel.r * 255.0;
-  if (channel == 1) return texel.g * 255.0;
-  if (channel == 2) return texel.b * 255.0;
-  if (channel == 3) return texel.a * 255.0;
-  return 0.0;
-}
-
-
 int index;
 ivec3 threadId;
 
+// idx = x + y * texDim.x + z * texDim.x * texDim.y
 ivec3 indexTo3D(int idx, ivec3 texDim) {
-  int z = int(idx / (texDim.x * texDim.y));
-  idx -= z * int(texDim.x * texDim.y);
-  int y = int(idx / texDim.x);
-  int x = int(integerMod(idx, texDim.x));
+  int tmp = texDim.x * texDim.y;
+  int z = idx / tmp;
+  idx -= z * tmp;
+  int y = idx / texDim.x;
+  int x = idx - y * texDim.x;
   return ivec3(x, y, z);
-}
-
-float get16(sampler2D tex, ivec2 texSize, ivec3 texDim, int z, int y, int x) {
-  int index = x + texDim.x * (y + texDim.y * z);
-  int w = texSize.x * 2;
-  vec2 st = vec2(float(integerMod(index, w)), float(index / w)) + 0.5;
-  vec4 texel = texture2D(tex, st / vec2(texSize.x * 2, texSize.y));
-  return decode16(texel, index);
-}
-
-float get8(sampler2D tex, ivec2 texSize, ivec3 texDim, int z, int y, int x) {
-  int index = x + texDim.x * (y + texDim.y * z);
-  int w = texSize.x * 4;
-  vec2 st = vec2(float(integerMod(index, w)), float(index / w)) + 0.5;
-  vec4 texel = texture2D(tex, st / vec2(texSize.x * 4, texSize.y));
-  return decode8(texel, index);
 }
 
 vec4 actualColor;

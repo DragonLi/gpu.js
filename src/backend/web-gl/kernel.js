@@ -966,7 +966,7 @@ class WebGLKernel extends GLKernel {
       CONSTANTS: this._getConstantsString(),
       DECODE32_ENDIANNESS: this._getDecode32EndiannessString(),
       ENCODE32_ENDIANNESS: this._getEncode32EndiannessString(),
-      DIVIDE_WITH_INTEGER_CHECK: this._getDivideWithIntegerCheckString(isPatch),
+      DIVIDE_WITH_INTEGER_CHECK: this._getDivideWithIntegerCheckString(),
       INJECTED_NATIVE: this._getInjectedNative(),
       MAIN_CONSTANTS: this._getMainConstantsString(),
       MAIN_ARGUMENTS: this._getMainArgumentsString(args),
@@ -1088,10 +1088,8 @@ class WebGLKernel extends GLKernel {
    * @desc if fixIntegerDivisionAccuracy provide method to replace /
    * @returns {String} result
    */
-  _getDivideWithIntegerCheckString(isPatch) {
-    const fixFunc = isPatch ?
-      `` :
-      `float divWithIntCheck(float x, float y) {
+  _getDivideWithIntegerCheckString() {
+    const fixFunc = `float divWithIntCheck(float x, float y) {
   if (floor(x) == x && floor(y) == y && integerMod(x, y) == 0.0) {
     return float(int(x) / int(y));
   }

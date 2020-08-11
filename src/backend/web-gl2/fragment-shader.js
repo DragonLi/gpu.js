@@ -18,16 +18,9 @@ float _pow(float v1, float v2) {
   return pow(v1, v2);
 }
 
-float integerMod(float x, float y) {
-  float res = floor(mod(x, y));
-  return res * (res > floor(y) - 1.0 ? 0.0 : 1.0);
-}
-
 int integerMod(int x, int y) {
   return x - (x/y) * y;
 }
-
-__DIVIDE_WITH_INTEGER_CHECK__;
 
 float decode16(vec4 texel, int index) {
   int channel = integerMod(index, 2);
@@ -45,23 +38,6 @@ ivec3 indexTo3D(int idx, ivec3 texDim) {
   int y = idx / texDim.x;
   int x = idx - y * texDim.x;
   return ivec3(x, y, z);
-}
-
-vec4 sampleTexBlock(sampler2D tex, ivec2 texSize, int index, int blockSize) {
-  int w = texSize.x * blockSize;
-  vec2 st = vec2(integerMod(index, w), index / w) + 0.5;
-  vec4 texel = texture(tex, st / vec2(w, texSize.y));
-  return texel;
-}
-
-float get16(sampler2D tex, ivec2 texSize, ivec3 texDim, int z, int y, int x) {
-  int index = x + texDim.x * (y + texDim.y * z);
-  vec4 texel = sampleTexBlock(tex, texSize, index, 2);
-  return decode16(texel, index);
-}
-
-int get16Int(sampler2D tex, ivec2 texSize, ivec3 texDim, int z, int y, int x) {
-  return int(get16(tex, texSize, texDim, z, y, x));
 }
 
 vec4 actualColor;
