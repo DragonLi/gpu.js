@@ -24,7 +24,7 @@ float integerMod(float x, float y) {
 }
 
 int integerMod(int x, int y) {
-  return x - (y * int(x/y));
+  return x - (x/y) * y;
 }
 
 __DIVIDE_WITH_INTEGER_CHECK__;
@@ -42,11 +42,13 @@ float decode8(vec4 texel, int index) {
 int index;
 ivec3 threadId;
 
+// idx = x + y * texDim.x + z * texDim.x * texDim.y
 ivec3 indexTo3D(int idx, ivec3 texDim) {
-  int z = idx / (texDim.x * texDim.y);
-  idx -= z * texDim.x * texDim.y;
-  int y = int(idx / texDim.x);
-  int x = integerMod(idx, texDim.x);
+  int tmp = texDim.x * texDim.y;
+  int z = idx / tmp;
+  idx -= z * tmp;
+  int y = idx / texDim.x;
+  int x = idx - y * texDim.x;
   return ivec3(x, y, z);
 }
 
