@@ -16,12 +16,12 @@ float _pow(float v1, float v2) {
   return pow(v1, v2);
 }
 
-int integerModInt(int x, int y) {
-  return x - (y * int(x / y));
+int integerMod(int x, int y) {
+  return x - (x / y) * y;
 }
 
 float decode16(vec4 texel, int index) {
-  int channel = integerModInt(index, 2);
+  int channel = integerMod(index, 2);
   if (channel == 0) return texel.r * 255.0 + texel.g * 65280.0;
   if (channel == 1) return texel.b * 255.0 + texel.a * 65280.0;
   return 0.0;
@@ -41,10 +41,6 @@ ivec3 indexTo3D(int idx, ivec3 texDim) {
 }
 
 vec4 actualColor;
-void color(float r, float g, float b, float a) {
-  actualColor = vec4(r,g,b,a);
-}
-
 
 __INJECTED_NATIVE__;
 __MAIN_CONSTANTS__;
