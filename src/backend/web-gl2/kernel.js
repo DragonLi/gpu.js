@@ -402,7 +402,10 @@ class WebGL2Kernel extends WebGLKernel {
    * @desc Get Kernel program string (in *glsl*) for a kernel.
    * @returns {String} result
    */
-  getKernelString() {
+  getKernelString(isPatch) {
+    if (isPatch) {
+      return window.WebGL2KernelStr;
+    }
     const result = [this.getKernelResultDeclaration()];
     const subKernels = this.subKernels;
     if (subKernels !== null) {

@@ -34,11 +34,6 @@ float decode16(vec4 texel, int index) {
   return texel[channel*2] * 255.0 + texel[channel*2 + 1] * 65280.0;
 }
 
-float decode8(vec4 texel, int index) {
-  int channel = integerMod(index, 4);
-  return texel[channel] * 255.0;
-}
-
 int index;
 ivec3 threadId;
 
@@ -52,28 +47,24 @@ ivec3 indexTo3D(int idx, ivec3 texDim) {
   return ivec3(x, y, z);
 }
 
-float get16(sampler2D tex, ivec2 texSize, ivec3 texDim, int z, int y, int x) {
-  int index = x + (texDim.x * (y + (texDim.y * z)));
-  int w = texSize.x * 2;
+vec4 sampleTexBlock(sampler2D tex, ivec2 texSize, int index, int blockSize) {
+  int w = texSize.x * blockSize;
   vec2 st = vec2(integerMod(index, w), index / w) + 0.5;
   vec4 texel = texture(tex, st / vec2(w, texSize.y));
+  return texel;
+}
+
+float get16(sampler2D tex, ivec2 texSize, ivec3 texDim, int z, int y, int x) {
+  int index = x + texDim.x * (y + texDim.y * z);
+  vec4 texel = sampleTexBlock(tex, texSize, index, 2);
   return decode16(texel, index);
 }
 
-float get8(sampler2D tex, ivec2 texSize, ivec3 texDim, int z, int y, int x) {
-  int index = x + (texDim.x * (y + (texDim.y * z)));
-  int w = texSize.x * 4;
-  vec2 st = vec2(integerMod(index, w), index / w) + 0.5;
-  vec4 texel = texture(tex, st / vec2(w, texSize.y));
-  return decode8(texel, index);
+int get16Int(sampler2D tex, ivec2 texSize, ivec3 texDim, int z, int y, int x) {
+  return int(get16(tex, texSize, texDim, z, y, x));
 }
-
 
 vec4 actualColor;
-void color(float r, float g, float b, float a) {
-  actualColor = vec4(r,g,b,a);
-}
-
 
 __INJECTED_NATIVE__;
 __MAIN_CONSTANTS__;

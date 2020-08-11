@@ -970,7 +970,7 @@ class WebGLKernel extends GLKernel {
       INJECTED_NATIVE: this._getInjectedNative(),
       MAIN_CONSTANTS: this._getMainConstantsString(),
       MAIN_ARGUMENTS: this._getMainArgumentsString(args),
-      KERNEL: this.getKernelString(),
+      KERNEL: this.getKernelString(isPatch),
       MAIN_RESULT: this.getMainResultString(),
       FLOAT_TACTIC_DECLARATION: this.getFloatTacticDeclaration(),
       INT_TACTIC_DECLARATION: this.getIntTacticDeclaration(),
@@ -1090,13 +1090,7 @@ class WebGLKernel extends GLKernel {
    */
   _getDivideWithIntegerCheckString(isPatch) {
     const fixFunc = isPatch ?
-      `float divWithIntCheck(float x, float y) {
-  if (floor(x) == x && floor(y) == y && integerMod(x, y) == 0.0) {
-    return float(int(x) / int(y));
-  }
-  return x / y;
-}
-` :
+      `` :
       `float divWithIntCheck(float x, float y) {
   if (floor(x) == x && floor(y) == y && integerMod(x, y) == 0.0) {
     return float(int(x) / int(y));
@@ -1179,7 +1173,10 @@ float integerCorrectionModulo(float number, float divisor) {
    * @desc Get Kernel program string (in *glsl*) for a kernel.
    * @returns {String} result
    */
-  getKernelString() {
+  getKernelString(isPatch) {
+    if (isPatch) {
+      return window.WebGL1KernelStr;
+    }
     const result = [this.getKernelResultDeclaration()];
     const { subKernels } = this;
     if (subKernels !== null) {
