@@ -43,26 +43,26 @@ int index;
 ivec3 threadId;
 
 ivec3 indexTo3D(int idx, ivec3 texDim) {
-  int z = int(idx / (texDim.x * texDim.y));
-  idx -= z * int(texDim.x * texDim.y);
+  int z = idx / (texDim.x * texDim.y);
+  idx -= z * texDim.x * texDim.y;
   int y = int(idx / texDim.x);
-  int x = int(integerMod(idx, texDim.x));
+  int x = integerMod(idx, texDim.x);
   return ivec3(x, y, z);
 }
 
 float get16(sampler2D tex, ivec2 texSize, ivec3 texDim, int z, int y, int x) {
   int index = x + (texDim.x * (y + (texDim.y * z)));
   int w = texSize.x * 2;
-  vec2 st = vec2(float(integerMod(index, w)), float(index / w)) + 0.5;
-  vec4 texel = texture(tex, st / vec2(texSize.x * 2, texSize.y));
+  vec2 st = vec2(integerMod(index, w), index / w) + 0.5;
+  vec4 texel = texture(tex, st / vec2(w, texSize.y));
   return decode16(texel, index);
 }
 
 float get8(sampler2D tex, ivec2 texSize, ivec3 texDim, int z, int y, int x) {
   int index = x + (texDim.x * (y + (texDim.y * z)));
   int w = texSize.x * 4;
-  vec2 st = vec2(float(integerMod(index, w)), float(index / w)) + 0.5;
-  vec4 texel = texture(tex, st / vec2(texSize.x * 4, texSize.y));
+  vec2 st = vec2(integerMod(index, w), index / w) + 0.5;
+  vec4 texel = texture(tex, st / vec2(w, texSize.y));
   return decode8(texel, index);
 }
 
